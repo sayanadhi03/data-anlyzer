@@ -14,3 +14,7 @@ def group_by(df: pd.DataFrame, column: str) -> pd.DataFrame:
 def filter_rows(df: pd.DataFrame, condition: str) -> pd.DataFrame:
     """Filter rows by a condition string, e.g., 'col>5'."""
     return df.query(condition)
+
+def correlation_matrix(df: pd.DataFrame) -> pd.DataFrame:
+    """Compute Pearson correlation matrix for numeric columns only."""
+    return df.corr(numeric_only=True)
