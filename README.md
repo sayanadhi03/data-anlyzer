@@ -46,6 +46,24 @@ Place your CSV or Excel file in the project directory. Then run commands like:
   ```bash
   python main.py "Diwali Sales Data.csv" --clean --chart bar --x Gender --y Amount --export
   ```
+- **Create a bar chart of State vs Amount:**
+  ```bash
+  python main.py "Diwali Sales Data.csv" --clean --chart bar --x State --y Amount --export
+  ```
+- **Create a bar chart of Product_Category vs Orders:**
+  ```bash
+  python main.py "Diwali Sales Data.csv" --clean --chart bar --x Product_Category --y Orders --export
+  ```
+- **Create a bar chart of Occupation vs Amount for Female Customers:**
+  ```bash
+  python main.py "Diwali Sales Data.csv" --clean --filter "Gender == 'F'" --chart bar --x Occupation --y Amount --export
+  ```
+- **Create a bar chart of Age Group vs Amount:**
+  ```bash
+  python main.py "Diwali Sales Data.csv" --clean --chart bar --x "Age Group" --y Amount --export
+  ```
+
+> **Tip:** You can customize the X and Y columns for bar charts to visualize any relationship in your dataset. Each chart will be saved as `bar_chart.png` in the `/reports` folder (overwrite if run multiple times).
 
 All exported files and charts will be saved in the `/reports` folder.
 
