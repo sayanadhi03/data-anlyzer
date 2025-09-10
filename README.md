@@ -20,7 +20,7 @@ A lightweight, modular Python CLI tool for quick dataset exploration, cleaning, 
    ```
 2. **Install dependencies:**
    ```bash
-   pip install -r requirements.txt
+   python -m pip install -r requirements.txt
    ```
 
 ## Usage
