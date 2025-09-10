@@ -6,9 +6,10 @@ A lightweight, modular Python CLI tool for quick dataset exploration, cleaning, 
 - Load CSV/Excel datasets from the command line
 - Data cleaning (remove nulls, handle duplicates, column renaming)
 - Summary statistics (mean, median, std, min, max)
-- Group by any column
-- Filter rows by custom conditions
-- Visualizations: line, bar, histogram, and pie charts
+- Group by any column and filter rows by conditions
+- Visualizations: line, bar (with annotations), histogram, and pie charts
+- PDF reports: append charts and include titles/descriptions per chart
+- Correlation analysis: export correlation.csv and correlation heatmap
 - Export results as CSV and charts as PNG (all saved in `/reports`)
 - Extensible, modular codebase for future enhancements
 
@@ -26,14 +27,17 @@ A lightweight, modular Python CLI tool for quick dataset exploration, cleaning, 
 ## Usage
 Place your CSV or Excel file in the project directory. Then run commands like:
 
+### Quick Start
 - **Show the first 5 rows:**
   ```bash
   python main.py "Diwali Sales Data.csv" --head
   ```
-- **Clean data and show summary statistics:**
+- **Clean data and show summary statistics (exports CSV):**
   ```bash
   python main.py "Diwali Sales Data.csv" --clean --stats --export
   ```
+
+### Filtering & Grouping
 - **Filter for female customers and get stats:**
   ```bash
   python main.py "Diwali Sales Data.csv" --clean --filter "Gender == 'F'" --stats --export
@@ -42,37 +46,94 @@ Place your CSV or Excel file in the project directory. Then run commands like:
   ```bash
   python main.py "Diwali Sales Data.csv" --clean --filter "Gender == 'F'" --groupby State --export
   ```
-- **Create a bar chart of Gender vs Amount:**
+
+### Charts (saved to /reports)
+- **Bar chart of Gender vs Amount:**
   ```bash
   python main.py "Diwali Sales Data.csv" --clean --chart bar --x Gender --y Amount --export
   ```
-- **Create a bar chart of State vs Amount:**
+- **Bar chart of State vs Amount:**
   ```bash
   python main.py "Diwali Sales Data.csv" --clean --chart bar --x State --y Amount --export
   ```
-- **Create a bar chart of Product_Category vs Orders:**
+- **Bar chart of Product_Category vs Orders:**
   ```bash
   python main.py "Diwali Sales Data.csv" --clean --chart bar --x Product_Category --y Orders --export
   ```
-- **Create a bar chart of Occupation vs Amount for Female Customers:**
+- **Bar chart of Occupation vs Amount for Female Customers:**
   ```bash
   python main.py "Diwali Sales Data.csv" --clean --filter "Gender == 'F'" --chart bar --x Occupation --y Amount --export
   ```
-- **Create a bar chart of Age Group vs Amount:**
+- **Histogram of Amount:**
   ```bash
-  python main.py "Diwali Sales Data.csv" --clean --chart bar --x "Age Group" --y Amount --export
+  python main.py "Diwali Sales Data.csv" --clean --chart hist --col Amount --export
+  ```
+- **Pie chart of Product_Category:**
+  ```bash
+  python main.py "Diwali Sales Data.csv" --clean --chart pie --col Product_Category --export
   ```
 
-> **Tip:** You can customize the X and Y columns for bar charts to visualize any relationship in your dataset. Each chart will be saved as `bar_chart.png` in the `/reports` folder (overwrite if run multiple times).
+### PDF Reporting
+- **Generate a PDF report (append charts to existing report):**
+  ```bash
+  python main.py "Diwali Sales Data.csv" --clean --stats --chart bar --x State --y Amount --export --pdf
+  ```
+- **Add custom title/description for the chart page in PDF:**
+  ```bash
+  python main.py "Diwali Sales Data.csv" --clean --chart pie --col Gender --export --pdf \
+    --chart-title "Gender Distribution" \
+    --chart-desc "Pie chart showing male vs female distribution in the dataset."
+  ```
 
-All exported files and charts will be saved in the `/reports` folder.
+### Correlation & Heatmap
+- **Export correlation matrix and heatmap:**
+  ```bash
+  python main.py "Diwali Sales Data.csv" --clean --correlation --export
+  ```
+- **Include heatmap in PDF with custom size/title:**
+  ```bash
+  python main.py "Diwali Sales Data.csv" --clean --correlation --export --pdf \
+    --chart-title "Sales Correlation Heatmap" --figsize "12,8"
+  ```
+- **Use a different colormap for the heatmap (e.g., viridis):**
+  ```bash
+  python main.py "Diwali Sales Data.csv" --clean --correlation --export --pdf \
+    --color "viridis" --chart-title "Correlation Heatmap"
+  ```
+
+### Advanced Chart Customization
+You can customize charts with these flags:
+- `--color` single color name (e.g., `"blue"`, `"green"`, `"skyblue"`)
+- `--fontsize` base font size (e.g., `16`)
+- `--figsize` figure size as `WIDTH,HEIGHT` (e.g., `"12,8"`)
+- `--horizontal` (bar charts only) to plot horizontal bars
+- `--grid` to show gridlines
+- `--chart-title` and `--chart-desc` to label chart pages in the PDF
+
+Examples:
+- **Horizontal bar chart with larger font and grid:**
+  ```bash
+  python main.py "Diwali Sales Data.csv" --clean --chart bar --x Occupation --y Amount \
+    --export --pdf --horizontal --fontsize 18 --grid --chart-title "Occupation vs Amount"
+  ```
+- **Pie chart with custom figure size and title:**
+  ```bash
+  python main.py "Diwali Sales Data.csv" --clean --chart pie --col Product_Category \
+    --export --pdf --chart-title "Product Category Share" --figsize "10,10"
+  ```
+
+> Note: For non-heatmap charts, `--color` must be a single valid matplotlib color (e.g., `"blue"`). For the heatmap, `--color` is treated as a colormap name (e.g., `"viridis"`).
+
+All exported files and charts are saved in the `/reports` folder. The PDF report is `/reports/report.pdf` and appends new charts on each run with `--pdf`.
 
 ## CLI Options
 Run `python main.py --help` to see all options:
 ```
 usage: main.py [-h] [--head] [--clean] [--rename OLD NEW] [--stats] [--groupby GROUPBY]
                [--filter FILTER] [--chart {line,bar,hist,pie}] [--x X] [--y Y] [--col COL]
-               [--export]
+               [--export] [--pdf] [--chart-title CHART_TITLE] [--chart-desc CHART_DESC]
+               [--color COLOR] [--fontsize FONTSIZE] [--figsize FIGSIZE]
+               [--horizontal] [--grid] [--correlation]
                file
 
 positional arguments:
@@ -91,7 +152,18 @@ options:
   --x X                 X column for chart (line/bar)
   --y Y                 Y column for chart (line/bar)
   --col COL             Column for histogram/pie
-  --export              Export summary and charts to /reports
+  --export              Export outputs to /reports
+  --pdf                 Generate/append a PDF report with charts
+  --chart-title CHART_TITLE
+                        Title for the chart page in the PDF
+  --chart-desc CHART_DESC
+                        Description for the chart page in the PDF
+  --color COLOR         Single color name (charts) or colormap name (heatmap)
+  --fontsize FONTSIZE   Base font size for chart text
+  --figsize FIGSIZE     Figure size as WIDTH,HEIGHT (e.g., "12,8")
+  --horizontal          Plot horizontal bar chart
+  --grid                Show gridlines on chart
+  --correlation         Export correlation CSV and heatmap PNG
 ```
 
 ## Contributing
